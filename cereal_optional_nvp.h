@@ -1,3 +1,7 @@
+#ifndef cereal_optional_nvp_h
+#define cereal_optional_nvp_h
+
+
 namespace cereal
 {
 	// Optionally load an NVP if its name equals to the current node's name
@@ -15,3 +19,6 @@ namespace cereal
 }
 
 #define CEREAL_OPTIONAL_NVP(ar, T) ::cereal::load_optional_nvp(ar, #T, T)
+
+
+#endif//cereal_optional_nvp_h
