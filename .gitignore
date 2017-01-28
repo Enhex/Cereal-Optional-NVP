@@ -274,3 +274,4 @@ __pycache__/
 # tools/**
 # !tools/packages.config
 Example/Example/a.json
+Example/Example/b.json

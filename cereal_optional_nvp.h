@@ -26,6 +26,9 @@ SOFTWARE.
 #define cereal_optional_nvp_h
 
 
+#include <cereal/details/traits.hpp>
+
+
 namespace cereal
 {
 	// Optionally load an NVP if its name equals to the current node's name
@@ -38,11 +41,34 @@ namespace cereal
 			return;
 		// if names are equal
 		if (strcmp(name, node_name) == 0)
-			ar(cereal::make_nvp(name, value));	// load the NVP. Advances to the next node
+			ar(make_nvp(name, value));	// load the NVP. Advances to the next node
+	}
+
+	// Saves NVP if predicate is true. Useful for avoiding splitting into save & load if also saving optionally.
+	template <class Archive, class T, class Predicate>
+	typename std::enable_if<traits::is_output_serializable<T, Archive>::value, void>::type
+	make_optional_nvp(Archive& ar, const char* name, T&& value, Predicate predicate)
+	{
+		if (predicate())
+			ar(make_nvp(name, value));
+	}
+
+	template <class Archive, class T, class Predicate>
+	typename std::enable_if<traits::is_input_serializable<T, Archive>::value, void>::type
+	make_optional_nvp(Archive& ar, const char* name, T&& value, Predicate predicate)
+	{
+		load_optional_nvp(ar, name, value);
 	}
 }
 
-#define CEREAL_OPTIONAL_NVP(ar, T) ::cereal::load_optional_nvp(ar, #T, T)
+
+// Macros for using the variable name as the NVP name
+#define EXPAND(x) x
+#define GET_CEREAL_OPTIONAL_NVP_MACRO(_1, _2, _3, NAME, ...) NAME
+#define CEREAL_OPTIONAL_NVP(...) EXPAND(GET_CEREAL_OPTIONAL_NVP_MACRO(__VA_ARGS__, CEREAL_OPTIONAL_NVP_3, CEREAL_OPTIONAL_NVP_2)(__VA_ARGS__))
+
+#define CEREAL_OPTIONAL_NVP_2(ar, T) ::cereal::load_optional_nvp(ar, #T, T)
+#define CEREAL_OPTIONAL_NVP_3(ar, T, P) ::cereal::make_optional_nvp(ar, #T, T, P)
 
 
 #endif//cereal_optional_nvp_h
