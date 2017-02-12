@@ -33,20 +33,29 @@ namespace cereal
 {
 	// Optionally load an NVP if its name equals to the current node's name
 	// Loading members should be done in the same order they were saved
+	// return true if NVP found
 	template <class Archive, class T>
-	void load_optional_nvp(Archive& ar, const char* name, T&& value)
+	bool load_optional_nvp(Archive& ar, const char* name, T&& value)
 	{
 		const auto node_name = ar.getNodeName();
-		if (!node_name)
-			return;
+		
 		// if names are equal
-		if (strcmp(name, node_name) == 0)
+		if (node_name != nullptr &&
+			strcmp(name, node_name) == 0)
+		{
 			ar(make_nvp(name, value));	// load the NVP. Advances to the next node
+			return true;
+		}
+
+		return false;
 	}
 
 	// Saves NVP if predicate is true. Useful for avoiding splitting into save & load if also saving optionally.
 	template <class Archive, class T, class Predicate>
-	typename std::enable_if<traits::is_output_serializable<T, Archive>::value, void>::type
+	typename std::enable_if<
+		traits::is_output_serializable<T, Archive>::value &&
+		!traits::is_input_serializable<T, Archive>::value
+	, void>::type
 	make_optional_nvp(Archive& ar, const char* name, T&& value, Predicate predicate)
 	{
 		if (predicate())
@@ -54,7 +63,10 @@ namespace cereal
 	}
 
 	template <class Archive, class T, class Predicate>
-	typename std::enable_if<traits::is_input_serializable<T, Archive>::value, void>::type
+	typename std::enable_if<
+		traits::is_input_serializable<T, Archive>::value &&
+		!traits::is_output_serializable<T, Archive>::value
+	, void>::type
 	make_optional_nvp(Archive& ar, const char* name, T&& value, Predicate predicate)
 	{
 		load_optional_nvp(ar, name, value);
