@@ -17,5 +17,7 @@ void load(Archive & ar)
 }
 ```
 
+Loading objects must be done in the same order they're saved.
+
 ## License
 MIT
