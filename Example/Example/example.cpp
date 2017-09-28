@@ -20,7 +20,7 @@ struct A
 	{
 		CEREAL_OPTIONAL_NVP(ar, x);
 		ar(CEREAL_NVP(y));
-		cereal::load_optional_nvp(ar, "z", z);
+		cereal::make_optional_nvp(ar, "z", z);
 	}
 };
 
@@ -31,9 +31,9 @@ struct B
 	template <class Archive>
 	void serialize(Archive & ar)
 	{
-		cereal::make_optional_nvp(ar, "x", x, []() {return true; });
-		CEREAL_OPTIONAL_NVP(ar, y, []() {return true; });
-		CEREAL_OPTIONAL_NVP(ar, z, []() {return true; });
+		cereal::make_optional_nvp(ar, "x", x);
+		CEREAL_OPTIONAL_NVP(ar, y);
+		CEREAL_OPTIONAL_NVP(ar, z, [this]() {return z != 1; }); // conditionally save
 	}
 };
 
