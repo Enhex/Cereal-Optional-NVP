@@ -1,5 +1,6 @@
-from conans import ConanFile, tools
-import os
+from os import path
+from conan import ConanFile
+from conan.tools.files import copy
 
 
 class CerealoptionalnvpConan(ConanFile):
@@ -9,8 +10,8 @@ class CerealoptionalnvpConan(ConanFile):
 	url = "https://github.com/Enhex/Cereal-Optional-NVP"
 	description = "Implementation of optionally loading name value pairs if they exist."
 	# No settings/options are necessary, this is header only
-	requires = "cereal/master@enhex/stable"
+	requires = "cereal/master"
 	exports_sources = "include/*"
 
 	def package(self):
-		self.copy("*.h")
+		copy(self, "*.h", path.join(self.source_folder, "include"), path.join(self.package_folder, "include"))
